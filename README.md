@@ -43,7 +43,7 @@ CorperCompass helps NYSC corpers navigate their new state — find safe areas, b
 | Framework | Express.js |
 | Database | MongoDB + Mongoose |
 | Auth | JWT + HTTP-only cookies |
-| Password Hashing | bcrypt (salt rounds: 12) |
+| Password Hashing | Argon (type: argon2id; memoryCost: 2^16 — 64MB; timeCost: 3; parallelism: 1) |
 | Validation | express-validator |
 | Security | helmet, cors, express-rate-limit, cookie-parser |
 | Testing | Jest + Supertest |
