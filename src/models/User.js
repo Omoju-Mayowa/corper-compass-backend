@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 import argon2 from 'argon2';
 
+import pLimit from 'p-limit'
+
+const hashLimit = pLimit(4)
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -11,15 +15,17 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre('save', async function (next) {
+const hashOptions = {
+  type: argon2.argon2id,
+  memoryCost: 2 ** 16,
+  timeCost: 3,
+  parallelism: 1, // keep this
+};
+
+userSchema.pre('save', async function (next) { // next back in params
   if (!this.isModified('password')) return next();
   try {
-    this.password = await argon2.hash(this.password, {
-      type: argon2.argon2id,
-      memoryCost: 2 ** 16,
-      timeCost: 3,
-      parallelism: 1,
-    });
+    this.password = await hashLimit(() => argon2.hash(this.password, hashOptions));
     next();
   } catch (err) {
     next(err);
@@ -28,9 +34,9 @@ userSchema.pre('save', async function (next) {
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
   try {
-    return await argon2.verify(this.password, enteredPassword);
-  } catch (err) {
-    return false;
+    return await hashLimit(() => argon2.verify(this.password, enteredPassword));
+  } catch {
+    return false; // safe fallback
   }
 };
 
