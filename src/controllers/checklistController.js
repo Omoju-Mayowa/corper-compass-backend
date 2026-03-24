@@ -32,10 +32,10 @@ export const getJourney = async (req, res, next) => {
 export const getProgress = async (req, res, next) => {
   try {
     const progress = await UserChecklistProgress.find({ user: req.user._id, completed: true });
-    const total = await UserChecklistProgress.countDocuments({ user: req.user._id });
-    const count = progress.length;
-    const percentage = total > 0 ? (count / total) * 100 : 0;
-    res.json({ completedItems: progress, percentage: percentage });
+    const totalItems = await ChecklistItem.countDocuments();
+    const completedCount = progress.length;
+    const percentage = totalItems > 0 ? (completedCount / totalItems) * 100 : 0;
+    res.json({ completedItems: progress.map(p => p.checklistItem.toString()), percentage: percentage });
   } catch (error) {
     next(error);
   }
