@@ -68,6 +68,15 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
+export const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const logoutUser = async (req, res, next) => {
   try {
     res.clearCookie('token');
