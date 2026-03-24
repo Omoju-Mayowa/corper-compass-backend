@@ -42,7 +42,8 @@ const allowedOrigins = [
     'http://localhost:5500',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    'https://corper-compass-frontend.vercel.app'
+    'https://corper-compass-frontend.vercel.app',
+    'https://group-11-corpercompass-frontend-sb9.vercel.app'
 ];
 app.use(cors({
     origin: (origin, callback) => {
