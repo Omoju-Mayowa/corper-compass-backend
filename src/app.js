@@ -38,6 +38,7 @@ app.use(generalLimiter)
 // CORS
 const allowedOrigins = [
     'https://corper-compass-frontend.vercel.app',
+    'https://corper-compass-frontend.vercel.app/',
     'https://group-11-corpercompass-frontend-sb9.vercel.app',
     'https://group-11-corpercompass-frontend-sb9.vercel.app/',
     process.env.FRONTEND_URL || 'http://localhost:5500',
