@@ -12,6 +12,16 @@ export const registerUser = async (req, res, next) => {
     }
     const user = await User.create({ name, email, password });
     const profile = await Profile.create({ user: user._id, postedState });
+    const token = generateToken(user._id);
+
+    // Set httpOnly cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     res.status(201).json({
       user: {
         _id: user._id,
@@ -20,7 +30,7 @@ export const registerUser = async (req, res, next) => {
         role: user.role,
       },
       profile,
-      token: generateToken(user._id),
+      token, // Still include in response for backward compatibility
     });
   } catch (error) {
     next(error);
@@ -32,12 +42,22 @@ export const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
+      const token = generateToken(user._id);
+
+      // Set httpOnly cookie
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      });
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id),
+        token, // Still include in response for backward compatibility
       });
     } else {
       res.status(401);
@@ -48,10 +68,10 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
-export const getMe = async (req, res, next) => {
+export const logoutUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
-    res.json(user);
+    res.clearCookie('token');
+    res.json({ message: 'Logged out successfully' });
   } catch (error) {
     next(error);
   }
